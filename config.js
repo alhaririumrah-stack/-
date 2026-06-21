@@ -1,0 +1,4 @@
+window.APP_CONFIG = {
+  API_URL: 'PASTE_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE',
+  APP_NAME: 'نظام تشغيل العمرة ERP'
+};
