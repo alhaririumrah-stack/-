@@ -38,7 +38,17 @@ function renderTripContext(){const s=$('tripContext'); if(!s)return; s.innerHTML
 async function setTripContext(v){APP.contextTrip=v; localStorage.setItem('umrah_trip',v); await refreshAppData(); openModule(current);}
 function buildNav(){const nav=$('nav'); nav.innerHTML=''; Object.keys(modules).forEach(k=>{const b=document.createElement('button');b.textContent=modules[k].t;b.onclick=()=>openModule(k);nav.appendChild(b)});}
 async function openModule(k){current=k; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); if(k==='Dashboard'){ $('dashboard').classList.add('active'); await loadDashboard(); return;} $('module').classList.add('active'); $('moduleTitle').textContent=modules[k].t; $('moduleDesc').textContent=modules[k].d+(modules[k].trip?' — الرحلة الحالية: '+(APP.contextTrip||'غير مختارة'):''); $('moduleForm').classList.add('hidden'); $('addBtn').style.display=k==='Reports'?'none':'inline-block'; $('addBtn').onclick=()=>showForm(); if(k==='Reports') loadReports(); else loadCurrent();}
-async function loadDashboard(){const r=await api('dashboard',{tripId:APP.contextTrip}); const c=$('cards'); if(c)c.innerHTML=Object.entries(r.stats||{}).map(([k,v])=>`<div class="card"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join(''); $('financeSummary').innerHTML=r.finance||''; $('opsAlerts').innerHTML=r.alerts||'';}
+async function loadDashboard(){
+  const r=await api('dashboard',{tripId:APP.contextTrip});
+  const c=$('cards');
+  if(c){
+    const actions=`<div class="card action"><b>بدء التشغيل</b><button onclick="openModule('Trips');setTimeout(()=>showForm(),100)">إنشاء رحلة جديدة</button><button onclick="openModule('Lookups')">الإعدادات الرئيسية</button><button onclick="openModule('ExchangeRates')">مركز الصرف</button></div>`;
+    const stats=Object.entries(r.stats||{}).map(([k,v])=>`<div class="card"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join('');
+    c.innerHTML=actions+stats;
+  }
+  $('financeSummary').innerHTML=r.finance||'';
+  $('opsAlerts').innerHTML=r.alerts||'';
+}
 function requireTrip(){if(modules[current]?.trip && !APP.contextTrip){alert('اختر رحلة أولاً من أعلى الصفحة. كل هذا القسم مربوط بالرحلة.');return false}return true;}
 function showForm(data={}){if(!requireTrip())return; const m=modules[current], f=$('moduleForm'); const auto=m.auto?`<div class="autoCode">الرقم سيولده النظام تلقائياً: <b>${m.auto}</b>${data[m.auto]?` — ${esc(data[m.auto])}`:''}</div>`:''; f.innerHTML=auto+m.fields.map((x,i)=>fieldHtml(x,m.labels[i]||x,data[x]||'',m.selects?.[x])).join('')+`<button type="submit">حفظ</button><button type="button" onclick="$('moduleForm').classList.add('hidden')">إلغاء</button>`; f.onsubmit=saveRecord; f.classList.remove('hidden');}
 function fieldHtml(name,label,value,lookup){let opts=null; if(lookup) opts=getOptions(lookup); if(opts){return `<label>${esc(label)}<select name="${esc(name)}"><option value="">اختر...</option>${opts.map(o=>`<option value="${esc(o.value)}" ${String(value)===String(o.value)?'selected':''}>${esc(o.label)}</option>`).join('')}</select></label>`} const type=name.toLowerCase().includes('date')?'date':(name.toLowerCase().includes('amount')||name.toLowerCase().includes('price')||name.toLowerCase().includes('capacity')||name.toLowerCase().includes('count')||name.toLowerCase().includes('rate')?'number':'text'); return `<label>${esc(label)}<input type="${type}" name="${esc(name)}" value="${esc(value)}"></label>`;}
