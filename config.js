@@ -1,4 +1,4 @@
 window.APP_CONFIG = {
-  API_URL: 'https://script.google.com/macros/s/AKfycbxro4YR5wExKJ3TFMCnsfBv71xaDXGf3gNmqauOFTwagPL6jNjH2nPHOW3y-FEOmHmaCw/exec',
+  API_URL: 'PUT_YOUR_APPS_SCRIPT_WEB_APP_EXEC_URL_HERE',
   APP_NAME: 'نظام تشغيل العمرة ERP'
 };
